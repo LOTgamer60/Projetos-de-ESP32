@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <ESP32Servo.h>
 
-const char* ssid = "SEU WIFI";
-const char* password = "SUA SENHA";
+const char* ssid = "SEU_WIFI";
+const char* password = "SENHA";
 
 IPAddress local_IP(192, 168, 23, 200);
 IPAddress gateway(192, 168, 23, 1);
@@ -12,14 +12,18 @@ WiFiServer server(80);
 
 Servo servo;
 
-// Estados
+#define LED 2
+
 bool acordado = false;
 
 void setup() {
   Serial.begin(115200);
 
+  pinMode(LED, OUTPUT);
+  digitalWrite(LED, LOW);
+
   servo.attach(13);
-  servo.write(0); // começa com olhos fechados
+  servo.write(0); // olhos fechados
 
   WiFi.config(local_IP, gateway, subnet);
   WiFi.begin(ssid, password);
@@ -35,20 +39,24 @@ void setup() {
   server.begin();
 }
 
-// Função para abrir olhos suavemente
-void abrirOlhos() {
+// abrir olhos + acender LED
+void acordarAnimatronico() {
+  digitalWrite(LED, HIGH); // LED liga primeiro
+
   for (int pos = 0; pos <= 90; pos++) {
     servo.write(pos);
-    delay(20); // controla a velocidade
+    delay(20);
   }
 }
 
-// Função para fechar olhos
-void fecharOlhos() {
+//  fechar olhos + apagar LED
+void dormirAnimatronico() {
   for (int pos = 90; pos >= 0; pos--) {
     servo.write(pos);
     delay(20);
   }
+
+  digitalWrite(LED, LOW); // LED apaga no final
 }
 
 void loop() {
@@ -59,20 +67,20 @@ void loop() {
 
     while(client.available()) client.read();
 
-    // 👀 ACORDAR
+    //  ACORDAR
     if (request.indexOf("GET /acordar") != -1) {
       if (!acordado) {
         Serial.println(">>> Acordando...");
-        abrirOlhos();
+        acordarAnimatronico();
         acordado = true;
       }
     }
 
-    // 😴 DORMIR
+    //  DORMIR
     else if (request.indexOf("GET /dormir") != -1) {
       if (acordado) {
         Serial.println(">>> Dormindo...");
-        fecharOlhos();
+        dormirAnimatronico();
         acordado = false;
       }
     }
