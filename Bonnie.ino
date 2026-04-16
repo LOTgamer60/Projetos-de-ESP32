@@ -1,8 +1,8 @@
 #include <WiFi.h>
 #include <ESP32Servo.h>
 
-const char* ssid = "Everton";
-const char* password = "tdhw06723";
+const char* ssid = "SEU WIFI";
+const char* password = "SUA SENHA";
 
 IPAddress local_IP(192, 168, 23, 200);
 IPAddress gateway(192, 168, 23, 1);
