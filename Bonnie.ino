@@ -10,24 +10,29 @@ IPAddress subnet(255, 255, 255, 0);
 
 WiFiServer server(80);
 
-Servo servo;
+Servo olhoE; // esquerdo
+Servo olhoD; // direito
 
-#define LED1 2
-#define LED2 4
+#define LED_E 2
+#define LED_D 4
 
 bool acordado = false;
 
 void setup() {
   Serial.begin(115200);
 
-  pinMode(LED1, OUTPUT);
-  pinMode(LED2, OUTPUT);
+  pinMode(LED_E, OUTPUT);
+  pinMode(LED_D, OUTPUT);
 
-  digitalWrite(LED1, LOW);
-  digitalWrite(LED2, LOW);
+  digitalWrite(LED_E, LOW);
+  digitalWrite(LED_D, LOW);
 
-  servo.attach(13);
-  servo.write(0); // olhos fechados
+  olhoE.attach(13);
+  olhoD.attach(12);
+
+  // começa fechado
+  olhoE.write(0);
+  olhoD.write(0);
 
   WiFi.config(local_IP, gateway, subnet);
   WiFi.begin(ssid, password);
@@ -43,30 +48,34 @@ void setup() {
   server.begin();
 }
 
-// 👀 acordar
+// 👀 ACORDAR (com leve diferença entre olhos)
 void acordarAnimatronico() {
-  // LEDs acendem primeiro
-  digitalWrite(LED1, HIGH);
-  digitalWrite(LED2, HIGH);
 
-  // abre devagar
+  // LEDs acendem primeiro
+  digitalWrite(LED_E, HIGH);
+  delay(80);
+  digitalWrite(LED_D, HIGH);
+
+  // abertura suave com diferença
   for (int pos = 0; pos <= 90; pos++) {
-    servo.write(pos);
+    olhoE.write(pos);
+    olhoD.write(pos - 5); // leve atraso
     delay(20);
   }
 }
 
-// 😴 dormir
+// 😴 DORMIR
 void dormirAnimatronico() {
-  // fecha devagar
+
   for (int pos = 90; pos >= 0; pos--) {
-    servo.write(pos);
+    olhoE.write(pos);
+    olhoD.write(pos - 5);
     delay(20);
   }
 
-  // LEDs apagam no final
-  digitalWrite(LED1, LOW);
-  digitalWrite(LED2, LOW);
+  digitalWrite(LED_E, LOW);
+  delay(50);
+  digitalWrite(LED_D, LOW);
 }
 
 void loop() {
